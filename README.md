@@ -118,9 +118,12 @@ it speaks its reply through the Echo's speaker.
   [opencode.ai/auth](https://opencode.ai/auth) and copy your API key.
   Set `AI_PROVIDER` to `opencode`, paste the key in `OPENCODE_API_KEY`,
   and pick a model ID in `OPENCODE_MODEL` from the live list at
-  `https://opencode.ai/inference/v1/models` — it includes fast, cheap
-  options (e.g. `deepseek-v4.1-flash-free`, `glm-5.3-flash-free`) and
-  stronger ones. Pay-as-you-go (Zen/Console) keys work against the
+  `https://opencode.ai/inference/v1/models` — the paid flash models
+  (e.g. `deepseek-v4.1-flash`) are fast and cost fractions of a cent
+  per voice-sized answer. **Note: the `-free` models cannot be used
+  here** — tested October 2026, the API rejects them with a
+  `FreeTierError` ("free tier can only be used from within OpenCode"),
+  even with the public community token. The free tier is app-only. Pay-as-you-go (Zen/Console) keys work against the
   default base URL, the officially documented
   `https://opencode.ai/inference/openai/v1`
   ([OpenCode Zen docs](https://opencode.ai/docs/zen/)); the community
@@ -151,8 +154,8 @@ it speaks its reply through the Echo's speaker.
   Set both `XAI_API_KEY` and `XAI_MODEL` (pick a current fast model).
 
 **Model choice for the 8-second window:** prefer fast, small models —
-`deepseek-v4.1-flash` (Hyper, the default), the free flash models on
-OpenCode, `sonar` (Perplexity) or a small/fast OpenAI model. `sonar-pro`
+`deepseek-v4.1-flash` (Hyper, the default; or the same paid model ID on
+OpenCode), `sonar` (Perplexity) or a small/fast OpenAI model. `sonar-pro`
 is more capable but does live web search and is more likely to exceed the
 response budget on heavy queries.
 

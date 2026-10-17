@@ -45,6 +45,7 @@ CONFIG = {
     # OPENCODE_BASE_URL = "https://opencode.ai/zen/go" (unverified path).
     "OPENCODE_API_KEY": "",
     "OPENCODE_MODEL": "",  # pick from https://opencode.ai/inference/v1/models
+                               # (note: "-free" models are app-only, not usable via API)
     "OPENCODE_BASE_URL": "",
 
     # Charm Hyper — https://hyper.charm.land
