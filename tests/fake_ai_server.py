@@ -21,6 +21,11 @@ class FakeAIHandler(BaseHTTPRequestHandler):
                                      "headers": dict(self.headers)})
 
         if self.path == "/chat/completions":
+            if self.server.error_status:
+                self._reply(self.server.error_status,
+                            {"error": {"message": "test provider error",
+                                       "type": "test"}})
+                return
             if self.server.sleep_seconds:
                 time.sleep(self.server.sleep_seconds)
             if self.server.trickle_seconds:
@@ -78,6 +83,7 @@ class FakeAIServer:
         self.server.sleep_seconds = 0.0
         self.server.directives_sleep = 0.0
         self.server.trickle_seconds = 0.0
+        self.server.error_status = 0
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
 

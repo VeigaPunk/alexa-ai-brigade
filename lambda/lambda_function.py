@@ -39,8 +39,10 @@ CONFIG = {
     "XAI_API_KEY": "",
     "XAI_MODEL": "",
 
-    # OpenCode (Zen pay-as-you-go or Go subscription) — https://opencode.ai/auth
-    # Go subscription keys: set OPENCODE_BASE_URL to https://opencode.ai/zen/go
+    # OpenCode — https://opencode.ai/auth (Zen/Console pay-as-you-go keys)
+    # Go subscription keys are NOT officially documented for direct API use;
+    # if your key is a Go key, test it — and if it fails, try
+    # OPENCODE_BASE_URL = "https://opencode.ai/zen/go" (unverified path).
     "OPENCODE_API_KEY": "",
     "OPENCODE_MODEL": "",  # pick from https://opencode.ai/inference/v1/models
     "OPENCODE_BASE_URL": "",
@@ -136,6 +138,7 @@ STRINGS = {
         "thinking": "Hmm, deixa eu pensar.",
         "empty": "Não entendi. Tente começar com o que é, me explique, ou quero saber.",
         "slow": "Isso demorou mais do que o esperado. Tente perguntar de novo, de forma mais curta.",
+        "provider": "Houve um problema com o provedor de IA. Verifique a chave e o modelo escolhido.",
         "nokey": "Ainda não configurei a chave de API do assistente. Veja o guia de instalação.",
         "nomodel": "Ainda não escolhi um modelo para o assistente. Veja o guia de instalação.",
         "help": "Você conversa comigo normalmente. Comece com frases como o que é, me explique ou quero saber, e eu respondo com a sua IA. Diga encerrar quando quiser parar.",
@@ -147,6 +150,7 @@ STRINGS = {
         "thinking": "Hmm, let me think.",
         "empty": "I didn't catch that. Try starting with what is, tell me about, or search for.",
         "slow": "That took longer than expected. Try asking again, a bit shorter.",
+        "provider": "There was a problem with the AI provider. Check the key and the chosen model.",
         "nokey": "The assistant API key is not configured yet. Check the setup guide.",
         "nomodel": "No model was chosen for the assistant yet. Check the setup guide.",
         "help": "Just talk to me naturally. Start with phrases like what is, tell me about, or search for, and I'll answer with your AI. Say stop when you're done.",
@@ -252,7 +256,8 @@ def provider_config():
         )
     if provider == "opencode":
         return (
-            setting("OPENCODE_BASE_URL") or "https://opencode.ai/zen/v1",
+            setting("OPENCODE_BASE_URL")
+            or "https://opencode.ai/inference/openai/v1",
             setting("OPENCODE_API_KEY"),
             setting("OPENCODE_MODEL"),
         )
@@ -332,10 +337,12 @@ def chat_completion(history):
     thread.start()
     thread.join(deadline)
 
-    if thread.is_alive() or "data" not in result:
+    if thread.is_alive():
         raise AIError("timeout")
     if "exc" in result:
         raise AIError("provider_error")
+    if "data" not in result:
+        raise AIError("timeout")
     data = result["data"]
     return data["choices"][0]["message"]["content"].strip()
 
@@ -391,6 +398,8 @@ def handle_query(event, s, locale):
             return build_response(s["nokey"], s["reprompt"], False, attrs)
         if exc.code == "no_model":
             return build_response(s["nomodel"], s["reprompt"], False, attrs)
+        if exc.code == "provider_error":
+            return build_response(s["provider"], s["reprompt"], False, attrs)
         return build_response(s["slow"], s["reprompt"], False, attrs)
     except Exception:
         return build_response(s["slow"], s["reprompt"], False, attrs)

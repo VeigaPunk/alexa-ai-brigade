@@ -198,6 +198,14 @@ def run_tests():
           "%.2fs" % elapsed)
     SERVER.server.trickle_seconds = 0
 
+    print("== 5d. Provider errors: auth failure and bad model ==")
+    for status, label in [(401, "auth"), (400, "bad model")]:
+        SERVER.server.error_status = status
+        r = lambda_function.lambda_handler(query("erro do provedor"), None)
+        check("%s error message (%d)" % (label, status),
+              "provedor" in speech_text(r), speech_text(r))
+    SERVER.server.error_status = 0
+
     print("== 6. Missing API key -> config message ==")
     os.environ["CUSTOM_API_KEY"] = ""
     r = lambda_function.lambda_handler(query("sem chave"), None)
@@ -212,7 +220,8 @@ def run_tests():
 
     print("== 6c. New provider presets ==")
     for prov, key, base, want_model in [
-        ("opencode", "OPENCODE_API_KEY", "https://opencode.ai/zen/v1", None),
+        ("opencode", "OPENCODE_API_KEY",
+         "https://opencode.ai/inference/openai/v1", None),
         ("hyper", "HYPER_API_KEY", "https://hyper.charm.land/v1",
          "deepseek-v4.1-flash"),
     ]:

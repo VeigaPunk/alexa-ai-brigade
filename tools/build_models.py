@@ -113,7 +113,7 @@ def build(locale):
 
 def main():
     verify_consistency()
-    out_dir = os.path.join(PKG, "skill-package", "interactionModels", "custom")
+    out_dir = os.path.join(PKG, "interactionModels", "custom")
     for locale in SAMPLES:
         path = os.path.join(out_dir, "%s.json" % locale)
         with open(path, "w", encoding="utf-8") as f:

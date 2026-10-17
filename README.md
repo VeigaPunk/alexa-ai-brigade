@@ -75,17 +75,20 @@ it speaks its reply through the Echo's speaker.
    **Alexa-hosted (Python)** → Template: **Start from scratch**. This
    gives you free AWS Lambda hosting managed by Amazon ([About Alexa-hosted
    skills](https://developer.amazon.com/en-US/docs/alexa/hosted-skills/build-a-skill-end-to-end-using-an-alexa-hosted-skill.html)).
-5. Fastest path — **Import Skill**: on the template screen choose
-   **Import Skill** and paste this repository's GitHub URL. The console
-   clones the repo and pre-fills both the interaction model (from
-   `skill-package/interactionModels/custom/`) and the code (from
-   `lambda/`). Then continue at step 2 below.
+5. Fastest path — **Import Skill** (needs a **public** repo URL): on
+   the template screen choose **Import Skill** and paste this
+   repository's GitHub URL. The repo follows the import contract
+   (`skill.json` + `interactionModels/custom/` + `lambda/`), so the
+   console pre-fills both the interaction model and the code. This repo
+   is private by default; ask and it can be flipped public (it contains
+   no secrets — keys are pasted only in the console), or use the manual
+   path below with either visibility.
 
    Manual path — in the **Build** tab → **JSON Editor**, replace
    everything with the contents of
-   `skill-package/interactionModels/custom/pt-BR.json` (or `en-US.json`),
-   then **Save** and **Build model**. The models use
-   `AMAZON.SearchQuery` with carrier phrases as
+   `interactionModels/custom/pt-BR.json` (or `en-US.json`), then
+   **Save** and **Build model**. The models use `AMAZON.SearchQuery`
+   with carrier phrases as
    [required by Amazon](https://developer.amazon.com/en-US/docs/alexa/custom-skills/slot-type-reference.html).
 
 ### 2. Paste the backend and configure your key
@@ -118,10 +121,14 @@ it speaks its reply through the Echo's speaker.
   `https://opencode.ai/inference/v1/models` — it includes fast, cheap
   options (e.g. `deepseek-v4.1-flash-free`, `glm-5.3-flash-free`) and
   stronger ones. Pay-as-you-go (Zen/Console) keys work against the
-  default base URL. If your key is from an **OpenCode Go subscription**,
-  gateway integrations document the Go-specific base
-  `https://opencode.ai/zen/go` — set it in `OPENCODE_BASE_URL` if the
-  default rejects the key ([OpenCode Zen docs](https://opencode.ai/docs/zen/)).
+  default base URL, the officially documented
+  `https://opencode.ai/inference/openai/v1`
+  ([OpenCode Zen docs](https://opencode.ai/docs/zen/)); the community
+  path `https://opencode.ai/zen/v1` is also live. **Go subscription
+  keys are not officially documented for direct API use** — test yours;
+  if the default base rejects it, some gateway integrations document
+  `https://opencode.ai/zen/go` (unverified path, set it via
+  `OPENCODE_BASE_URL`).
 - **Charm Hyper:** get a key (`sk-hyper-...`) at
   [hyper.charm.land](https://hyper.charm.land). Set `AI_PROVIDER` to
   `hyper` and paste the key in `HYPER_API_KEY`. The default model
@@ -171,7 +178,7 @@ cd alexa-ai-brigade
 python3 tests/test_skill.py
 ```
 
-33 local mock assertions: request routing, carrier-phrase restoration,
+35 local mock assertions: request routing, carrier-phrase restoration,
 conversation memory, progressive responses, SSML escaping, timeout
 fallback inside the 8-second budget (including a delayed directives
 endpoint and a slowly-trickling response body), both locales. These
@@ -257,17 +264,16 @@ Practical implications for you:
 ## Package contents
 
 ```
-skill-package/
-  interactionModels/custom/   interaction models (pt-BR, en-US) — this
-                              layout is what the Alexa console's
-                              "Import Skill" expects from a Git repo
+skill.json                    skill manifest (Alexa import contract)
+interactionModels/custom/     interaction models (pt-BR, en-US)
 lambda/lambda_function.py     the skill backend (single file, stdlib only,
                               CONFIG block at the top)
+lambda/requirements.txt       empty — no dependencies needed
 tools/
   build_models.py             regenerates the interaction models and checks
                               carrier/prefix consistency with the backend
 tests/
-  test_skill.py               33 local mock assertions (simulated Alexa + fake AI)
+  test_skill.py               35 local mock assertions (simulated Alexa + fake AI)
   fake_ai_server.py           local stand-in for the AI + directives APIs
 README.md                     this guide
 ```
